@@ -194,3 +194,41 @@ function DOMDisplay(parent, level) {
 }
 
 
+var scale = 15;
+
+
+DOMDisplay.prototype.drawBackground = function() {
+	var table = element("table", "background");
+	table.style.width = this.level.width * scale + "px";
+	table.style.height = this.level.height * scale + "px";
+	this.level.grid.forEach(function(row) {
+  var rowElement = table.appendChild(element("tr"));
+		rowElement.style.height = scale + "px";
+		row.forEach(function(type) {
+			rowElement.appendChild(element("td", type));
+		});
+	});
+	return table;
+};
+
+DOMDisplay.prototype.drawActors = function() {
+	var wrap = element("div");
+	this.level.actors.forEach(function(actor) {
+		var rect = wrap.appendChild(element("div", "actor " + actor.type));
+		rect.style.width = actor.size.x * scale + "px";
+		rect.style.height = actor.size.y * scale + "px";
+		rect.style.left = actor.pos.x * scale + "px";
+		rect.style.top = actor.pos.y * scale + "px";
+	});
+	return wrap;
+}
+
+DOMDisplay.prototype.drawFrame = function() {
+	if (this.actorLayer)
+		this.wrap.removeChild(this.actorLayer);
+	this.actorLayer = this.wrap.appendChild(this.drawActors());
+	this.wrap.className = "game " + (this.level.status || "");
+	this.scrollPlayerIntoView();
+};
+
+
