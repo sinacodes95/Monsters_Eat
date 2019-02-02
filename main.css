@@ -1,19 +1,25 @@
+
 body {
   margin: 0;
   padding: 0;
-  background: black;
+  background: #141E30;
   background-size: cover;
   font-family: sans-serif;
 }
 
+h2{
+    color: #666;
+    font-family: monospace;
+    text-align: center;
+}
 .neon {
   position: absolute;
-  top: 50%;
+  top: 80%;
   left: 50%;
   transform: translate(-50%, -50%);
   margin: 0;
   padding: 0 20px;
-  font-size: 11em;
+  font-size: 12.5em;
   color: #fff;
   text-shadow: 0 0 20px #ff005b;
 }
