@@ -48,3 +48,38 @@ h2{
   filter: blur(40px);
 }
 
+.background{
+    table-layout: fixed;
+    border-spacing: 0;
+}
+.background td{
+    padding:  0;
+}
+.poison, .actor{
+    background: green;
+}
+.wall{
+    background: #444;
+    border: solid 1.5px blue;
+    box-sizing: content-box;
+}
+.actor{
+    position: absolute;
+}
+.coin{
+    background: #e2e838;
+}
+.player{
+    background: violet;
+}
+.lost .player{
+    background: green;
+}
+.won .player {
+    background: yellow;
+}
+
+.game{
+    position: relative;
+    overflow: hidden;
+}
