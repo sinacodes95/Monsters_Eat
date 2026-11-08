@@ -1,24 +1,94 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10101d">
   <title>Monsters Eat</title>
   <link rel="stylesheet" href="main.css">
+  <script src="engine.js" defer></script>
+  <script src="levels.js" defer></script>
+  <script src="app.js" defer></script>
 </head>
-
 <body>
-  <div class="wrapper">
-    <h1 class="neon" data-text="[Monsters_Eat]">[Monsters_Eat]</h1>
-  </div>
-  <h2>Monsters Eat</h2>
-  <h2>Get All the Coins to win</h2>
-  <h2>Don't touch the poison or monsters</h2>
-  <h2>Don't trust the tiles some of them are traps</h2>
+  <main class="arcade">
+    <header class="masthead">
+      <div>
+        <p class="eyebrow"><span class="brand-mark" aria-hidden="true"></span> Underground arcade</p>
+        <h1>Monsters <span>Eat</span></h1>
+      </div>
+      <p class="mission">Eat every coin. If you die, start back at Level 1.</p>
+    </header>
 
+    <section class="cabinet" aria-label="Monsters Eat game">
+      <header class="hud">
+        <div class="level">
+          <span class="sr-only">Stage</span>
+          <span class="level-number" id="level-number">01</span>
+          <div class="level-title">
+            <span class="caption" aria-hidden="true">Stage</span>
+            <strong id="level-name">Loading…</strong>
+          </div>
+        </div>
+        <div class="hud-actions">
+          <div class="score">
+            <span class="coin-icon" aria-hidden="true"></span>
+            <div>
+              <span class="caption">Coins</span>
+              <strong id="coin-count">0 / 0</strong>
+            </div>
+          </div>
+          <button type="button" class="restart" id="restart">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M4 5v6h6M4 11a8 8 0 1 1 2.5 7" />
+            </svg>
+            <span>Restart</span>
+          </button>
+        </div>
+      </header>
+
+      <div id="stage" tabindex="0" role="region" aria-label="Playing field" aria-describedby="game-instructions">
+        <div class="stage-backdrop" aria-hidden="true"></div>
+        <noscript><p class="no-script">Enable JavaScript to play Monsters Eat.</p></noscript>
+        <div id="result" class="result" role="group" aria-labelledby="result-title" hidden>
+          <div class="result-card">
+            <p id="result-kicker" class="eyebrow"></p>
+            <h2 id="result-title"></h2>
+            <p id="result-description"></p>
+            <button type="button" id="result-action" class="result-action"></button>
+          </div>
+        </div>
+      </div>
+
+      <footer class="deck" role="group" aria-label="Game controls">
+        <div class="control-group">
+          <div class="control-buttons">
+            <button type="button" class="control-button" data-control="left" aria-label="Move left">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M19 12H5m6 6-6-6 6-6"/></svg>
+            </button>
+            <button type="button" class="control-button" data-control="right" aria-label="Move right">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+            </button>
+          </div>
+          <div class="control-label">
+            <span>Move</span>
+            <span class="keyboard-hint" aria-hidden="true"><kbd>A</kbd> <kbd>D</kbd></span>
+          </div>
+        </div>
+        <div class="control-group">
+          <button type="button" class="control-button jump-button" data-control="up" aria-label="Jump">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 19V5m-6 6 6-6 6 6"/></svg>
+          </button>
+          <div class="control-label">
+            <span>Jump</span>
+            <span class="keyboard-hint" aria-hidden="true"><kbd>Space</kbd></span>
+          </div>
+        </div>
+        <p id="game-instructions" class="instructions"><kbd>←</kbd> <kbd>→</kbd> or <kbd>A</kbd> <kbd>D</kbd> to move. <kbd>↑</kbd>, <kbd>W</kbd>, or <kbd>Space</kbd> to jump.</p>
+      </footer>
+    </section>
+
+    <p id="game-status" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
+  </main>
 </body>
-<script src="./app.js"></script>
-
 </html>

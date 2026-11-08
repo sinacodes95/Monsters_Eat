@@ -1,454 +1,262 @@
-var LEVELS = [
-  ["                                                                                ",
-   "                                                                                ",
-   "                                                                                ",
-   "                                                                                ",
-   "                                                                                ",
-   "                                                                                ",
-   "                                                    o             xxx           ",
-   "                                                   xxx     xx    xx!xx          ",
-   "                                    o o      xx                  x!!!x          ",
-   "                                                                 xx!xx          ",
-   "                                   xxxxx               xxxx       xvx           ",
-   "                                                        ||                    xx",
-   "  xxxxxx                                  o o                                x  ",
-   "  x                     o                                                    x  ",
-   "  x                                      xxxxx                             o x  ",
-   "  x          xxxx       o                                                    x  ",
-   "  x  @       x  x       x                                        xxxxx       x  ",
-   "  xxxxxxxxxxxx  xxxxxxxxxxxxxxx   xxxxxxxxxxxxxxxxxxxx     xxxxxxx   xxxxxxxxx  ",
-   "                              x   x                  x     x                    ",
-   "                              x!!!x                  x!!!!!x                    ",
-   "                              x!!!x                  x!!!!!x                    ",
-   "                              xxxxx                  xxxxxxx                    ",
-   "                                                                                ",
-   "                                                                                "],
-  ["                                                                                                              ",
-   "                                                                                                              ",
-   "                                                                          o                                   ",
-   "                                                                         xxx    o                             ",
-   "                                                                               xxx                            ",
-   "                                                                              x!!!x                           ",
-   "                                                                               xxx                            ",
-   "                                                                                                              ",
-   "                                                                            x x          o                    ",
-   "                                                                           x!!!x         o                    ",
-   "                                                                            xxx          o                    ",
-   "                                                                    o                    o                    ",
-   "                                           = = = = x               xxx                                        ",
-   "                                                                  x!!!x       o                               ",
-   "                                         = = = =x     o            xxx       xxx                              ",
-   "                                                                            x!!!x  xxx   o                    ",
-   "                              o   o                        xxxxx             xxv        xxx                   ",
-   "                                                                     x                 x!!!x                  ",
-   "                             xxx xxxx            o o xx!!!!!!!!!!!!!!x                   vx                   ",
-   "                             x xxx xx               xxx!!!!!!!!!!!!!!x                                        ",
-   "                             x           xxx   xxxxxxxxxxxxxxxxxxxxxxx                                        ",
-   "                             xx           xx                                         xxx                      ",
-   "  xxx                         x     xx    x                                         x!!!x                xxx  ",
-   "  x x                         x    xxx    x                                          xxx                 x x  ",
-   "  x                           x    xxx    xxxxxxx                        xxxxx                             x  ",
-   "  x                           x           x                              x   x                             x  ",
-   "  x       xxxx                xxx         x                              x x x xxx                         x  ",
-   "  x         v                             x       |xxxx|    |xxxx|     xxx xxx                             x  ",
-   "  x                xxx            o o     x                              x         xxx                     x  ",
-   "  x               xxxxx       xx   xxx    x                             xxx       x!!!x          x         x  ",
-   "  x             o  xxx  o     x    xxx    x                             xxx        xxx          xxx        x  ",
-   "  x                xxx        xxxxxxxxxxxxx  x oo x    x oo x    x oo  xxxxx                    xxx        x  ",
-   "  x      @          x         x           x!!x    x!!!!x    x!!!!x    xxxxxxx                    x    o o  x  ",
-   "  xxxxxxxxxxxxxxxxxxxxxxxxxxxxx           xxxxxxxxxxxxxxxxxxxxxxxxxxxxx     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx  ",
-   "                                                                                                              ",
-   "                                                                                                              "],
-  ["                                                                                                              ",
-   "                                                                                             o o oxxx x       ",
-   "              xxxxxxxx                                                                                x       ",
-   "       !  o  !                                                xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx       ",
-   "       x     x                                                x   x x   x x   x x   x x   x x   x x           ",
-   "       x= o  x            x                                   xxx x xxx x xxx x xxx x xxx x xxx x xxxxx       ",
-   "       x     x                                                  x x   x x   x x   x x   x x   x x     x       ",
-   "       !  o  !            o                                  xxxx xxxxx xxxxx xxxxx xxxxx xxxxx xxxxxxx       ",
-   "                                                                                                              ",
-   "          o              xxx                              xx                                                  ",
-   "                                                                                                              ",
-   "                                                                                                              ",
-   "                                                      xx                                                      ",
-   "                   xxx         xxx                                                                            ",
-   "                                                                                                              ",
-   "                          o                                                     x      x                      ",
-   "                                                          xx     xx                                           ",
-   "             xxx         xxx         xxx                                 x                  x                 ",
-   "                                                                                                              ",
-   "                                                                 ||                                           ",
-   "       xxxxxx                                                                                                 ",
-   "  x         x o xxxxxxxxx o xxxxxxxxx o xx                                                x                   ",
-   "  x         x   x       x   x       x   x                 ||                  x     x                         ",
-   "  x  @      xxxxx   o   xxxxx   o   xxxxx                                                                     ",
-   "  xxxxxxx                                     xxxxx     xxxx     xxx    xxx                                   ",
-   "        x=                  =                =x   x                     xxx                                   ",
-   "        xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx   x!!!!!!!!!!!!!!!!!!!!!xxx!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
-   "                                                  xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-   "                                                                                                              "]
-];
-var arrowCodes = {37: "left", 38: "up", 39: "right"};
-var scale = 15;
-var maxStep = 0.05;
-var playerXSpeed = 10;
-var gravity = 30;
-var jumpSpeed = 17;
+const TILE_SIZE = 24;
+const SPARK_DURATION = 0.45;
 
-function Vector(x, y) {
-	this.x = x; this.y = y;
+function makeElement(tag, className, parent) {
+  const element = document.createElement(tag);
+  if (className) element.className = className;
+  return parent.appendChild(element);
 }
 
-Vector.prototype.plus = function(other) {
-	return new Vector(this.x + other.x, this.y + other.y);
-};
-
-Vector.prototype.times = function(scale) {
-	return new Vector(this.x * scale, this.y * scale);
-};
-
-var actorchars =  {
-	"@": Player,
-	"o": Coin,
-	"=": Poison,
-	"|": Poison,
-	"v": Poison
-};
-
-function Player(pos) {
-	this.pos = pos.plus(new Vector(0, -0.5));
-	this.size = new Vector(0.8, 1.5);
-	this.speed = new Vector(0, 0);
-}
-Player.prototype.type = "player";
-
-function Poison(pos, char) {
-	this.pos = pos;
-	this.size = new Vector(1, 1);
-	if (char === "=")
-		this.speed = new Vector(2, 0);
-	else if (char === '|')
-		this.speed = new Vector(0, 2);
-	else if (char === 'v'){
-		this.speed = new Vector(0, 3); 		   
-		this.repeatPos = pos;
-	}
-}
-Poison.prototype.type = "poison";
-
-function Coin(pos) {
-	this.basePos = this.pos = pos;
-	this.size = new Vector(.6, .6);
-	this.wobble = Math.random() * Math.PI * 2;
-}
-Coin.prototype.type = "coin";
-
-Level.prototype.isFinished = function() {
-  return this.status != null && this.finishDelay < 0;
-};
-
-function Level(plan) {
-	this.width = plan[0].length;
-	this.height = plan.length;
-	this.grid = [];
-	this.actors = [];
-	
-	for (var y = 0; y < this.height; y++) {
-		var line = plan[y],  gridLine = [];
-		for (var x = 0; x < this.width; x++) {
-			var char = line[x], fieldType = null;
-			var Actor = actorchars[char];
-			if (Actor)
-				this.actors.push(new Actor(new Vector(x, y), char));
-			else if (char === "x")
-				fieldType = "wall";
-			else if (char === "!")
-				fieldType = "poison";
-			else if (char === "|")
-				fieldType = "poison";
-			else if (char === "=")
-				fieldType = "poison";
-			else if (char === "v"){
-				fieldType = "poison";
-				console.log(fieldType);
-			}
-			gridLine.push(fieldType)
-		}
-		this.grid.push(gridLine);
-	}
-	this.player = this.actors.filter(function(actor) {
-		return actor.type === "player"
-	})[0];	
-	this.status = this.finishDelay = null;
+function positionElement(element, x, y) {
+  element.style.transform = `translate3d(${x}px, ${y}px, 0)`;
 }
 
-function element(name, className) {
-	var elem = document.createElement(name);
-	if(className) elem.className = className;
-	return elem;
-}
-
-function DOMDisplay(parent, level) {
-	this.wrap = parent.appendChild(element("div", "game"));
-	this.level = level;
-	
-	this.wrap.appendChild(this.drawBackground());
-	this.actorLayer = null;
-	this.drawFrame();
-}
-
-DOMDisplay.prototype.drawBackground = function() {
-	var table = element("table", "background");
-	table.style.width = this.level.width * scale + "px";
-	table.style.height = this.level.height * scale + "px";
-	this.level.grid.forEach(function(row) {
-  var rowElement = table.appendChild(element("tr"));
-		rowElement.style.height = scale + "px";
-		row.forEach(function(type) {
-			rowElement.appendChild(element("td", type));
-		});
-	});
-	return table;
-};
-
-DOMDisplay.prototype.drawActors = function() {
-	var wrap = element("div");
-	this.level.actors.forEach(function(actor) {
-		var rect = wrap.appendChild(element("div", "actor " + actor.type));
-		rect.style.width = actor.size.x * scale + "px";
-		rect.style.height = actor.size.y * scale + "px";
-		rect.style.left = actor.pos.x * scale + "px";
-		rect.style.top = actor.pos.y * scale + "px";
-	});
-	return wrap;
-}
-
-DOMDisplay.prototype.drawFrame = function() {
-	if (this.actorLayer)
-		this.wrap.removeChild(this.actorLayer);
-	this.actorLayer = this.wrap.appendChild(this.drawActors());
-	this.wrap.className = "game " + (this.level.status || "");
-	this.scrollPlayerIntoView();
-};
-
-DOMDisplay.prototype.scrollPlayerIntoView = function() {
-  var width = this.wrap.clientWidth;
-  var height = this.wrap.clientHeight;
-  var margin = width / 3;
-
-  var left = this.wrap.scrollLeft, right = left + width;
-  var top = this.wrap.scrollTop, bottom = top + height;
-
-  var player = this.level.player;
-  var center = player.pos.plus(player.size.times(1))
-                 .times(scale);
-
-  if (center.x < left + margin)
-    this.wrap.scrollLeft = center.x - margin;
-  else if (center.x > right - margin)
-    this.wrap.scrollLeft = center.x + margin - width;
-  if (center.y < top + margin)
-    this.wrap.scrollTop = center.y - margin;
-  else if (center.y > bottom - margin)
-    this.wrap.scrollTop = center.y + margin - height;
-};
-
-DOMDisplay.prototype.clear = function() {
-	this.wrap.parentNode.removeChild(this.wrap);
-};
-
-Level.prototype.obstacleAt = function(pos, size) {
-  var xStart = Math.floor(pos.x);
-  var xEnd = Math.ceil(pos.x + size.x);
-  var yStart = Math.floor(pos.y);
-  var yEnd = Math.ceil(pos.y + size.y);
-
-  if (xStart < 0 || xEnd > this.width || yStart < 0)
-    return "wall";
-  if (yEnd > this.height)
-    return "poison";
-  for (var y = yStart; y < yEnd; y++) {
-    for (var x = xStart; x < xEnd; x++) {
-      var fieldType = this.grid[y][x];
-      if (fieldType) return fieldType;
-    }
+class DOMDisplay {
+  constructor(stage, level) {
+    this.level = level;
+    this.wrap = makeElement("div", "game", stage);
+    this.wrap.setAttribute("aria-hidden", "true");
+    this.world = makeElement("div", "world", this.wrap);
+    this.width = level.width * TILE_SIZE;
+    this.height = level.height * TILE_SIZE;
+    this.world.style.width = `${this.width}px`;
+    this.world.style.height = `${this.height}px`;
+    this.drawBackground();
+    this.actorLayer = makeElement("div", "actor-layer", this.world);
+    this.effects = makeElement("div", "effects", this.world);
+    this.sprites = new Map();
+    this.sparks = [];
+    this.drawFrame(0);
   }
-};
 
-Level.prototype.actorAt = function(actor) {
-  for (var i = 0; i < this.actors.length; i++) {
-    var other = this.actors[i];
-    if (other != actor &&
-        actor.pos.x + actor.size.x > other.pos.x &&
-        actor.pos.x < other.pos.x + other.size.x &&
-        actor.pos.y + actor.size.y > other.pos.y &&
-        actor.pos.y < other.pos.y + other.size.y)
-      return other;
-  }
-};
-
-Level.prototype.animate = function(step, keys) {
-  if (this.status != null)
-    this.finishDelay -= step;
-
-  while (step > 0) {
-    var thisStep = Math.min(step, maxStep);
-    this.actors.forEach(function(actor) {
-      actor.act(thisStep, this, keys);
-    }, this);
-    step -= thisStep;
-  }
-};
-
-Poison.prototype.act = function(step, level) {
-  var newPos = this.pos.plus(this.speed.times(step));
-  if (!level.obstacleAt(newPos, this.size))
-    this.pos = newPos;
-  else if (this.repeatPos)
-    this.pos = this.repeatPos;
-  else
-    this.speed = this.speed.times(-1);
-};
-
-var wobbleSpeed = 8, wobbleDist = 0.07;
-
-Coin.prototype.act = function(step) {
-  this.wobble += step * wobbleSpeed;
-  var wobblePos = Math.sin(this.wobble) * wobbleDist;
-  this.pos = this.basePos.plus(new Vector(0, wobblePos));
-};
-
-Player.prototype.moveX = function(step, level, keys) {
-  this.speed.x = 0;
-  if (keys.left) this.speed.x -= playerXSpeed;
-  if (keys.right) this.speed.x += playerXSpeed;
-
-  var motion = new Vector(this.speed.x * step, 0);
-  var newPos = this.pos.plus(motion);
-  var obstacle = level.obstacleAt(newPos, this.size);
-  if (obstacle)
-    level.pCollision(obstacle);
-  else
-    this.pos = newPos;
-};
-
-Player.prototype.moveY = function(step, level, keys) {
-  this.speed.y += step * gravity;
-  var motion = new Vector(0, this.speed.y * step);
-  var newPos = this.pos.plus(motion);
-  var obstacle = level.obstacleAt(newPos, this.size);
-  if (obstacle) {
-    level.pCollision(obstacle);
-    if (keys.up && this.speed.y > 0)
-      this.speed.y = -jumpSpeed;
-    else
-      this.speed.y = 0;
-  } else {
-    this.pos = newPos;
-  }
-};
-
-Player.prototype.act = function(step, level, keys) {
-  this.moveX(step, level, keys);
-  this.moveY(step, level, keys);
-
-  var otherActor = level.actorAt(this);
-  if (otherActor)
-    level.pCollision(otherActor.type, otherActor);
-
-  if (level.status == "lost") {
-    this.pos.y += step;
-    this.size.y -= step;
-  }
-};
-
-Level.prototype.pCollision = function(type, actor) {
-  if (type == "poison" && this.status == null) {
-    this.status = "lost";
-    this.finishDelay = 1;
-  } else if (type == "coin") {
-    this.actors = this.actors.filter(function(other) {
-      return other != actor;
+  drawBackground() {
+    const table = makeElement("table", "background", this.world);
+    table.style.width = `${this.width}px`;
+    table.style.height = `${this.height}px`;
+    const rows = makeElement("tbody", "", table);
+    this.level.grid.forEach((row, y) => {
+      const line = makeElement("tr", "", rows);
+      line.style.height = `${TILE_SIZE}px`;
+      row.forEach((tile, x) => {
+        const exposed = tile === "wall" && (y === 0 || this.level.grid[y - 1][x] !== "wall");
+        makeElement("td", exposed ? "wall wall-top" : tile, line);
+      });
     });
-    if (!this.actors.some(function(actor) {
-      return actor.type == "coin";
-    })) {
-      this.status = "won";
-      this.finishDelay = 1;
-    }
   }
-};
 
-function trackKeys(codes) {
-  var pressed = Object.create(null);
-  function handler(event) {
-    if (codes.hasOwnProperty(event.keyCode)) {
-      var down = event.type == "keydown";
-      pressed[codes[event.keyCode]] = down;
-      event.preventDefault();
-    }
-  }
-  addEventListener("keydown", handler);
-  addEventListener("keyup", handler);
-  return pressed;
-}
-
-function runAnimation(frameFunc) {
-  var lastTime = null;
-  function frame(time) {
-    var stop = false;
-    if (lastTime != null) {
-      var timeStep = Math.min(time - lastTime, 100) / 1000;
-      stop = frameFunc(timeStep) === false;
-    }
-    lastTime = time;
-    if (!stop)
-      requestAnimationFrame(frame);
-  }
-  requestAnimationFrame(frame);
-}
-
-var arrows = (function (a) {
-  var pressed = Object.create(null);
-  function handler(event) {
-    if (a.hasOwnProperty(event.keyCode)) {
-      var down = event.type == "keydown";
-      pressed[a[event.keyCode]] = down;
-      event.preventDefault();
-    }
-  }
-  addEventListener("keydown", handler);
-  addEventListener("keyup", handler);
-  return pressed;
-})(arrowCodes);
-
-function playLevel(level, Display, andThen) {
-  var display = new Display(document.body, level);
-  runAnimation(function(step) {
-    level.animate(step, arrows);
-    display.drawFrame(step);
-    if (level.isFinished()) {
-      display.clear();
-      if (andThen)
-        andThen(level.status);
+  drawFrame(step) {
+    this.sparks = this.sparks.filter(spark => {
+      spark.remaining -= step;
+      if (spark.remaining > 0) return true;
+      spark.element.remove();
       return false;
-    }
-  });
-}
-
-function app(plans, Display) {
-  function startLevel(n) {
-    playLevel(new Level(plans[n]), Display, function(status) {
-      if (status == "lost")
-        startLevel(n);
-      else if (n < plans.length - 1)
-        startLevel(n + 1);
-      else
-        alert("You win!");
     });
+
+    const activeActors = new Set(this.level.actors);
+    for (const [actor, sprite] of this.sprites) {
+      if (activeActors.has(actor)) continue;
+      const element = makeElement("div", "coin-spark", this.effects);
+      positionElement(element, (actor.pos.x + actor.size.x / 2) * TILE_SIZE,
+        (actor.pos.y + actor.size.y / 2) * TILE_SIZE);
+      this.sparks.push({element, remaining: SPARK_DURATION});
+      sprite.remove();
+      this.sprites.delete(actor);
+    }
+
+    for (const actor of activeActors) {
+      let sprite = this.sprites.get(actor);
+      if (!sprite) {
+        sprite = makeElement("div", `actor ${actor.type}`, this.actorLayer);
+        if (actor.kind) sprite.classList.add(actor.kind);
+        sprite.style.width = `${actor.size.x * TILE_SIZE}px`;
+        sprite.style.height = `${actor.size.y * TILE_SIZE}px`;
+        this.sprites.set(actor, sprite);
+      }
+
+      positionElement(sprite, actor.pos.x * TILE_SIZE, actor.pos.y * TILE_SIZE);
+      if (actor.type === "player") {
+        sprite.classList.toggle("facing-left", actor.facing < 0);
+        sprite.classList.toggle("airborne", !actor.grounded);
+        sprite.classList.toggle("running", actor.grounded && Math.abs(actor.speed.x) > 0.1);
+      }
+    }
+
+    this.wrap.classList.toggle("lost", this.level.status === "lost");
+    this.wrap.classList.toggle("won", this.level.status === "won");
+    this.followPlayer(step);
   }
-  startLevel(0);
+
+  followPlayer(step) {
+    const {clientWidth: width, clientHeight: height} = this.wrap;
+    const {pos, size} = this.level.player;
+    const x = (pos.x + size.x / 2) * TILE_SIZE - width * 0.44;
+    const y = (pos.y + size.y / 2) * TILE_SIZE - height * 0.58;
+    const targetX = width >= this.width ? (this.width - width) / 2 :
+      Math.max(0, Math.min(this.width - width, x));
+    const targetY = height >= this.height ? this.height - height :
+      Math.max(0, Math.min(this.height - height, y));
+
+    if (this.cameraX === undefined || step === 0) {
+      this.cameraX = targetX;
+      this.cameraY = targetY;
+    } else {
+      const follow = 1 - Math.exp(-step * 12);
+      this.cameraX += (targetX - this.cameraX) * follow;
+      this.cameraY += (targetY - this.cameraY) * follow;
+    }
+
+    positionElement(this.world, -Math.round(this.cameraX), -Math.round(this.cameraY));
+  }
+
+  clear() {
+    this.wrap.remove();
+  }
 }
 
-app(LEVELS, DOMDisplay);
+function startGame() {
+  const stage = document.getElementById("stage");
+  const levelNumber = document.getElementById("level-number");
+  const levelName = document.getElementById("level-name");
+  const coinCount = document.getElementById("coin-count");
+  const status = document.getElementById("game-status");
+  const result = document.getElementById("result");
+  const resultKicker = document.getElementById("result-kicker");
+  const resultTitle = document.getElementById("result-title");
+  const resultDescription = document.getElementById("result-description");
+  const resultAction = document.getElementById("result-action");
+  const controls = Array.from(document.querySelectorAll("[data-control]"));
+  const keys = trackKeys();
+  const heldControls = new Map();
+
+  let level;
+  let levelIndex;
+  let display;
+  let frameId;
+  let lastTime;
+  let lastCoins;
+  let nextLevel;
+
+  function clearInput() {
+    keys.reset();
+    heldControls.clear();
+    controls.forEach(button => button.classList.remove("pressed"));
+  }
+
+  function holdControl(id, button) {
+    if (level.status !== null) return;
+    heldControls.set(id, button);
+    keys.setTouch(button.dataset.control, true);
+    button.classList.add("pressed");
+  }
+
+  function releaseControl(id) {
+    const button = heldControls.get(id);
+    if (!button) return;
+    heldControls.delete(id);
+    if (Array.from(heldControls.values()).includes(button)) return;
+    keys.setTouch(button.dataset.control, false);
+    button.classList.remove("pressed");
+  }
+
+  controls.forEach(button => {
+    button.addEventListener("pointerdown", event => {
+      if (event.button !== 0 || level.status !== null) return;
+      event.preventDefault();
+      button.setPointerCapture(event.pointerId);
+      holdControl(event.pointerId, button);
+    });
+    for (const eventName of ["pointerup", "pointercancel", "lostpointercapture"]) {
+      button.addEventListener(eventName, event => releaseControl(event.pointerId));
+    }
+
+    button.addEventListener("keydown", event => {
+      if (event.key !== " " && event.key !== "Enter") return;
+      event.preventDefault();
+      if (!event.repeat) holdControl(event.key, button);
+    });
+    button.addEventListener("keyup", event => releaseControl(event.key));
+    button.addEventListener("blur", () => {
+      releaseControl(" ");
+      releaseControl("Enter");
+    });
+  });
+
+  window.addEventListener("blur", clearInput);
+  document.addEventListener("visibilitychange", () => {
+    lastTime = null;
+    if (document.hidden) clearInput();
+  });
+  window.addEventListener("resize", () => display.drawFrame(0));
+
+  function updateCoins() {
+    if (lastCoins === level.coinsRemaining) return;
+    lastCoins = level.coinsRemaining;
+    coinCount.textContent = `${level.totalCoins - lastCoins} / ${level.totalCoins}`;
+  }
+
+  function begin(requestedIndex, focusStage = false) {
+    const afterDeath = level?.status === "lost";
+    const index = afterDeath ? 0 : requestedIndex;
+    cancelAnimationFrame(frameId);
+    clearInput();
+    result.hidden = true;
+    if (display) display.clear();
+
+    levelIndex = index;
+    level = new Level(LEVELS[index]);
+    levelNumber.textContent = String(index + 1).padStart(2, "0");
+    levelName.textContent = LEVEL_NAMES[index];
+    stage.dataset.level = String(index + 1);
+    stage.dataset.state = "playing";
+    display = new DOMDisplay(stage, level);
+    lastTime = null;
+    lastCoins = null;
+    updateCoins();
+    const stageMessage = `Level ${index + 1}. ${LEVEL_NAMES[index]}. Collect ${level.totalCoins} coins.`;
+    status.textContent = afterDeath ? `Poisoned. Back to ${stageMessage}` : stageMessage;
+    if (focusStage) stage.focus({preventScroll: true});
+    frameId = requestAnimationFrame(frame);
+  }
+
+  function showResult() {
+    if (levelIndex < LEVELS.length - 1) {
+      resultKicker.textContent = `Level ${levelIndex + 1} complete`;
+      resultTitle.textContent = "Every coin collected";
+      resultDescription.textContent = `${LEVEL_NAMES[levelIndex + 1]} is up next.`;
+      resultAction.textContent = "Next level";
+      nextLevel = levelIndex + 1;
+    } else {
+      resultKicker.textContent = "Campaign complete";
+      resultTitle.textContent = "You ate them all!";
+      resultDescription.textContent = "Every coin collected across all three levels.";
+      resultAction.textContent = "Play again";
+      nextLevel = 0;
+    }
+
+    result.hidden = false;
+    status.textContent = `${resultTitle.textContent} ${resultDescription.textContent}`;
+    resultAction.focus({preventScroll: true});
+  }
+
+  function frame(time) {
+    const step = lastTime === null || document.hidden ? 0 : Math.min((time - lastTime) / 1000, 0.1);
+    lastTime = time;
+    level.animate(step, keys);
+    if (level.status !== null && stage.dataset.state === "playing") {
+      stage.dataset.state = level.status;
+      clearInput();
+    }
+    updateCoins();
+    display.drawFrame(step);
+
+    if (!level.isFinished()) frameId = requestAnimationFrame(frame);
+    else if (level.status === "lost") begin(0);
+    else showResult();
+  }
+
+  document.getElementById("restart").addEventListener("click", () => begin(levelIndex, true));
+  resultAction.addEventListener("click", () => begin(nextLevel, true));
+  begin(0);
+}
+
+startGame();
