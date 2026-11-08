@@ -7,5 +7,7 @@ Logo and design implemented with vanilla CSS.
 #### eloquentjavascript.net (Project: A Platform Game)
 Dying on any level takes you back to level 1 (sorry not sorry)
 
+![Level 1 screenshot](./assets/Screenshot-level-1.png)
+
 ## Browser compatability:
 #### Tested and developed on Microsoft Edge but also compatible with firefox and chrome.
